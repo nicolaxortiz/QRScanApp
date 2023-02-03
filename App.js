@@ -11,34 +11,6 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   const initial = States();
 
-  const tiempoTranscurrido = Date.now();
-  const hoy = new Date(tiempoTranscurrido);
-
-  const hoyFix = formatoFecha(hoy);
-
-  function formatoFecha(fecha) {
-    const map = {
-      dd: fecha.getDate(),
-      mm: fecha.getMonth() + 1,
-      yyyy: fecha.getFullYear(),
-      hour: fecha.getHours(),
-      minute: fecha.getMinutes(),
-    };
-
-    let am;
-
-    if (map.hour > 12) {
-      map.hour = map.hour - 12;
-      am = false;
-    } else {
-      am = true;
-    }
-
-    return `${map.dd}/${map.mm}/${map.yyyy} - ${map.hour}:${map.minute} ${
-      am ? "AM" : "PM"
-    }`;
-  }
-
   return (
     <UseContext.Provider value={initial}>
       <NavigationContainer>

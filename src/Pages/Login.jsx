@@ -12,6 +12,14 @@ import {
   horizontalScale,
   moderateScale,
 } from "../themes/Metrics";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
+import UseFireBase from "../FireBase/Config";
+import { UseContext } from "../Context/UseContext";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Login() {
   const [login, setLogin] = React.useState({
@@ -19,6 +27,34 @@ export default function Login() {
     password: "",
   });
   const [error, setError] = React.useState("");
+
+  const { auth } = UseFireBase();
+  const navigation = useNavigation();
+
+  const { setUserId } = React.useContext(UseContext);
+
+  const btnLogin = () => {
+    const { email, password } = login;
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        navigation.navigate("Home");
+      })
+      .catch((error) => {
+        setError("*Tus datos son incorrectos*");
+      });
+  };
+
+  React.useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        setUserId(uid);
+        navigation.navigate("Home");
+      } else {
+      }
+    });
+  }, []);
 
   return (
     <View style={styles.view}>
@@ -107,7 +143,8 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: verticalScale(25),
     fontSize: moderateScale(16),
-    color: "#F05C5C",
+    color: "#7B1F4B",
+    fontWeight: "bold",
   },
 
   imgLogo: {

@@ -10,17 +10,110 @@ import {
 import Read from "../Components/Read";
 import { UseContext } from "../Context/UseContext";
 import UseFireBase from "../FireBase/Config";
+import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
 
 const HomeScreen = () => {
-  const { scanned, setScanned } = React.useContext(UseContext);
+  const { scanned, setScanned, userId } = React.useContext(UseContext);
+  const [message, setMesagge] = React.useState("");
 
-  const handleBarCodeScanned = async ({ data }) => {
-    const { db } = UseFireBase();
-    setScanned(true);
-    if (data == "codigosecreto") {
+  const GetDateTime = async () => {
+    const tiempoTranscurrido = Date.now();
+    const hoy = new Date(tiempoTranscurrido);
+
+    const hoyFix = formatoFecha(hoy);
+
+    function formatoFecha(fecha) {
+      const map = {
+        dd: fecha.getDate(),
+        mm: fecha.getMonth() + 1,
+        yyyy: fecha.getFullYear(),
+        hour: fecha.getHours(),
+        minute: fecha.getMinutes(),
+      };
+
+      let am;
+
+      if (map.hour > 12) {
+        map.hour = map.hour - 12;
+        am = false;
+      } else {
+        am = true;
+      }
+
+      let formatoLargo = `${map.dd}/${map.mm}/${map.yyyy}-${map.hour}:${
+        map.minute
+      } ${am ? "AM" : "PM"}`;
+
+      return formatoLargo.split("-");
     }
 
-    // const docRef = await addDoc(collection(db, "Asistencia"), Data);
+    return hoyFix;
+  };
+
+  let dataUser = {
+    nombre: "",
+    documento: "",
+    userId: userId,
+  };
+
+  const GetData = async (tipo) => {
+    const { db } = UseFireBase();
+    const userRef = collection(db, "Usuarios");
+    const q = query(userRef, where("userId", "==", userId));
+
+    const querySnapshot = await getDocs(q);
+
+    const getDateTime = await GetDateTime();
+    console.log(tipo);
+    querySnapshot.forEach((doc) => {
+      dataUser = {
+        ...dataUser,
+        nombre: doc.data().Nombre,
+        documento: doc.data().Documento,
+        tipo: tipo,
+        fecha: getDateTime[0],
+        hora: getDateTime[1],
+      };
+    });
+  };
+
+  const VerifyRegister = async () => {
+    const { db } = UseFireBase();
+    const getDateTime = await GetDateTime();
+    const q = query(
+      collection(db, "Asistencia"),
+      where("userId", "==", userId),
+      where("fecha", "==", getDateTime[0])
+    );
+
+    const querySnapshot = await getDocs(q);
+    let count = [];
+    querySnapshot.forEach((doc) => {
+      count = [...count, doc.id];
+    });
+
+    return count.length;
+  };
+
+  const handleBarCodeScanned = async ({ data }) => {
+    if (data == "EPb!GKduSqc03&2SGiwu89II^VNQ0nH@U#dJU") {
+      setScanned(true);
+
+      const numberRegister = await VerifyRegister();
+      const { db } = UseFireBase();
+
+      if (numberRegister == 0) {
+        await GetData("Entrada");
+        setMesagge("Registrada tu hora de entrada");
+        const docRef = await addDoc(collection(db, "Asistencia"), dataUser);
+      } else if (numberRegister == 1) {
+        await GetData("Salida");
+        setMesagge("Registrada tu hora de Salida");
+        const docRef = await addDoc(collection(db, "Asistencia"), dataUser);
+      } else if (numberRegister >= 2) {
+        setMesagge("Ya tienes todos los registros del dia");
+      }
+    }
   };
 
   return (
@@ -35,7 +128,7 @@ const HomeScreen = () => {
           type={"back"}
         />
 
-        {scanned && <Read />}
+        {scanned && <Read message={message} nombre={dataUser.nombre} />}
         {scanned && <View style={styles.tapadera} />}
       </View>
     </View>

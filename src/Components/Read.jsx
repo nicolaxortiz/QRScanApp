@@ -7,12 +7,14 @@ import {
 } from "../themes/Metrics";
 import { UseContext } from "../Context/UseContext";
 
-export default function Read() {
+export default function Read({ message, nombre }) {
   const { setScanned } = React.useContext(UseContext);
   return (
     <View style={styles.container}>
       <Text style={styles.Titulo}>Bienvenido</Text>
-      <Text style={styles.Texto}>Profesor Nicolas Ortiz</Text>
+      <Text style={styles.Texto}>Profesor/a {nombre}</Text>
+      <Text style={styles.Texto2}>{message}</Text>
+
       <Pressable
         onPress={() => {
           setScanned(false);
@@ -29,7 +31,7 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     backgroundColor: "#fff",
-    top: "45%",
+    top: "30%",
     width: horizontalScale(300),
     zIndex: 2,
     borderRadius: 5,
@@ -44,6 +46,11 @@ const styles = StyleSheet.create({
 
   Texto: {
     fontSize: moderateScale(27),
+  },
+
+  Texto2: {
+    fontSize: moderateScale(17),
+    marginTop: verticalScale(20),
   },
 
   btn: {
