@@ -15,6 +15,7 @@ import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
 const HomeScreen = () => {
   const { scanned, setScanned, userId } = React.useContext(UseContext);
   const [message, setMesagge] = React.useState("");
+  const [nombre, setNombre] = React.useState("");
 
   const GetDateTime = async () => {
     const tiempoTranscurrido = Date.now();
@@ -64,7 +65,7 @@ const HomeScreen = () => {
     const querySnapshot = await getDocs(q);
 
     const getDateTime = await GetDateTime();
-    console.log(tipo);
+
     querySnapshot.forEach((doc) => {
       dataUser = {
         ...dataUser,
@@ -75,6 +76,8 @@ const HomeScreen = () => {
         hora: getDateTime[1],
       };
     });
+
+    setNombre(dataUser.nombre);
   };
 
   const VerifyRegister = async () => {
@@ -111,6 +114,7 @@ const HomeScreen = () => {
         setMesagge("Registrada tu hora de Salida");
         const docRef = await addDoc(collection(db, "Asistencia"), dataUser);
       } else if (numberRegister >= 2) {
+        await GetData("");
         setMesagge("Ya tienes todos los registros del dia");
       }
     }
@@ -128,7 +132,7 @@ const HomeScreen = () => {
           type={"back"}
         />
 
-        {scanned && <Read message={message} nombre={dataUser.nombre} />}
+        {scanned && <Read message={message} nombre={nombre} />}
         {scanned && <View style={styles.tapadera} />}
       </View>
     </View>

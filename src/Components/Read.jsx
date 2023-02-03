@@ -12,7 +12,7 @@ export default function Read({ message, nombre }) {
   return (
     <View style={styles.container}>
       <Text style={styles.Titulo}>Bienvenido</Text>
-      <Text style={styles.Texto}>Profesor/a {nombre}</Text>
+      <Text style={styles.Texto}>Profesor/a: {nombre}</Text>
       <Text style={styles.Texto2}>{message}</Text>
 
       <Pressable
@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
 
   Texto: {
     fontSize: moderateScale(27),
+    textAlign: "center",
   },
 
   Texto2: {
